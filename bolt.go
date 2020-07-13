@@ -36,12 +36,11 @@ type ssBoltHandler struct {
 	conf *BoltConfig
 }
 
-func NewBoltStore(conf *BoltConfig) (*ssBoltHandler, error) {
+func NewBoltStore(conf *BoltConfig) (store.Store, error) {
 	db, err := bolt.Open(conf.StoreFile(), 0600, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return &ssBoltHandler{
 		dbP:  db,
 		conf: conf,
@@ -91,12 +90,10 @@ func (b *ssBoltHandler) Create(i store.Item) error {
 	if ok != true {
 		return errors.New("item is not Serializable")
 	}
-
 	idSetter, ok := i.(store.IDSetter)
 	if ok == true {
 		idSetter.SetID(uuid.New().String())
 	}
-
 	if timeTracker, ok := i.(store.TimeTracker); ok {
 		var unixTime = time.Now().Unix()
 		timeTracker.SetCreated(unixTime)
@@ -114,7 +111,6 @@ func (b *ssBoltHandler) Create(i store.Item) error {
 			return err
 		}
 	}
-
 	// Main Bucket
 	err := b.dbP.Update(func(tx *bolt.Tx) error {
 		key := createBoltKey(i)
@@ -139,7 +135,6 @@ func (b *ssBoltHandler) Read(i store.Item) error {
 	if ok != true {
 		return errors.New("item is not Serializable")
 	}
-
 	bucketName := []byte(b.conf.Bucket)
 	key := createBoltKey(i)
 
@@ -163,7 +158,6 @@ func (b *ssBoltHandler) Update(i store.Item) error {
 	if ok != true {
 		return errors.New("item is not Serializable")
 	}
-
 	if timeTracker, ok := i.(store.TimeTracker); ok {
 		// Delete Prev Updated
 		delKey := []byte(fmt.Sprintf("%d_updated", timeTracker.GetUpdated()))
@@ -180,7 +174,6 @@ func (b *ssBoltHandler) Update(i store.Item) error {
 			return err
 		}
 	}
-
 	// Main Bucket
 	err := b.dbP.Update(func(tx *bolt.Tx) error {
 		key := createBoltKey(i)
@@ -278,7 +271,6 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 						if err != nil {
 							return err
 						}
-
 						listCounter++
 					}
 				}
