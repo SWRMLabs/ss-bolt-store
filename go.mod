@@ -1,4 +1,4 @@
-module ss-bolt-store
+module github.com/StreamSpace/ss-bolt-store
 
 go 1.14
 
