@@ -8,3 +8,5 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/ipfs/go-log/v2 v2.1.1
 )
+
+replace github.com/StreamSpace/ss-store => ../ss-store

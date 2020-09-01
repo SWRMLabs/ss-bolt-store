@@ -18,6 +18,14 @@ type successStruct struct {
 	UpdatedAt int64
 }
 
+type streamspaceFactory struct {}
+
+func (f streamspaceFactory) Factory() store.SerializedItem {
+	return &successStruct{
+		Namespace: "StreamSpace",
+	}
+}
+
 func (t *successStruct) GetNamespace() string { return t.Namespace }
 
 func (t *successStruct) GetId() string { return t.Id }
@@ -79,14 +87,10 @@ func TestNewBoltStoreInvalUpdatedAtConfig(t *testing.T) {
 
 func TestNewBoltStore(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
-	}
+	defer bltHndlr.Close()
 }
 
 func TestNewBoltCreation(t *testing.T) {
@@ -108,17 +112,16 @@ func TestNewBoltCreation(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
-	}
+	defer bltHndlr.Close()
 }
 
 func TestNewBoltRead(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
+
 	d := successStruct{
 		Namespace: "StreamSpace",
 		Id:        "04791e92-0b85-11ea-8d71-362b9e155667",
@@ -126,21 +129,17 @@ func TestNewBoltRead(t *testing.T) {
 		UpdatedAt: time.Now().Unix(),
 	}
 	err = bltHndlr.Read(&d)
-
 	if err != nil {
 		t.Fatalf(err.Error())
-	}
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }
 
 func TestNewBoltUpdate(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 	d := successStruct{
 		Namespace: "StreamSpace",
 		Id:        "04791e92-0b85-11ea-8d71-362b9e155667",
@@ -156,10 +155,6 @@ func TestNewBoltUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
-	}
 }
 
 func TestNewBoltDelete(t *testing.T) {
@@ -167,6 +162,7 @@ func TestNewBoltDelete(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 
 	d := successStruct{
 		Namespace: "StreamSpace",
@@ -186,21 +182,16 @@ func TestNewBoltDelete(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
-	}
 }
 
 func TestSortNaturalLIST(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
-
+	defer bltHndlr.Close()
 	// Create some dummies with StreamSpace namespace
-	for i := 1; i < 2; i++ {
+	for i := 0; i < 5; i++ {
 		d := successStruct{
 			Namespace: "StreamSpace",
 			Id:        uuid.New().String(),
@@ -214,7 +205,7 @@ func TestSortNaturalLIST(t *testing.T) {
 	}
 
 	//Create some dummies with Other namespace
-	for i := 1; i < 2; i++ {
+	for i := 0; i < 5; i++ {
 		d := successStruct{
 			Namespace: "Other",
 			Id:        uuid.New().String(),
@@ -229,203 +220,122 @@ func TestSortNaturalLIST(t *testing.T) {
 		}
 	}
 
-	var sort store.Sort
-
-	sort = 0
-
+	var sort store.Sort = 0
 	opts := store.ListOpt{
-		Page:  1,
+		Page:  0,
 		Limit: 3,
 		Sort:  sort,
 	}
 
-	ds := store.Items{}
-
-	for i := 0; int64(i) < opts.Limit; i++ {
-		d := successStruct{
-			Namespace: "StreamSpace",
-		}
-		ds = append(ds, &d)
-	}
-
-	_, err = bltHndlr.List(ds, opts)
+	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-
-	for i := 0; i < len(ds); i++ {
+	for i := 0; i < count; i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
-	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }
 
 func TestSortCreatedAscLIST(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 
-	var sort store.Sort
-
-	sort = 1
-
+	var sort store.Sort = 1
 	opts := store.ListOpt{
-		Page:  1,
+		Page:  0,
 		Limit: 3,
 		Sort:  sort,
 	}
 
-	ds := store.Items{}
-
-	for i := 0; int64(i) < opts.Limit; i++ {
-		d := successStruct{
-			Namespace: "StreamSpace",
-		}
-		ds = append(ds, &d)
-	}
-
-	_, err = bltHndlr.List(ds, opts)
+	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < len(ds); i++ {
+	for i := 0; i < count; i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
-	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }
 func TestSortCreatedDscLIST(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 
-	var sort store.Sort
-
-	sort = 2
-
+	var sort store.Sort = 2
 	opts := store.ListOpt{
-		Page:  1,
+		Page:  0,
 		Limit: 3,
 		Sort:  sort,
 	}
 
-	ds := store.Items{}
-
-	for i := 0; int64(i) < opts.Limit; i++ {
-		d := successStruct{
-			Namespace: "StreamSpace",
-		}
-		ds = append(ds, &d)
-	}
-
-	_, err = bltHndlr.List(ds, opts)
+	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < len(ds); i++ {
+	for i := 0; i < count; i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
-	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }
 func TestSortUpdatedAscLIST(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 
-	var sort store.Sort
-
-	sort = 3
-
+	var sort store.Sort = 3
 	opts := store.ListOpt{
-		Page:  1,
+		Page:  0,
 		Limit: 3,
 		Sort:  sort,
 	}
 
-	ds := store.Items{}
-
-	for i := 0; int64(i) < opts.Limit; i++ {
-		d := successStruct{
-			Namespace: "StreamSpace",
-		}
-		ds = append(ds, &d)
-	}
-
-	_, err = bltHndlr.List(ds, opts)
+	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < len(ds); i++ {
+	for i := 0; i < count; i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
-	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }
 
 func TestSortUpdatedDscLIST(t *testing.T) {
 	bltHndlr, err := NewBoltStore(&bltCnfg)
-
 	if err != nil {
 		t.Fatalf("Bolt store init failed")
 	}
+	defer bltHndlr.Close()
 
-	var sort store.Sort
-
-	sort = 4
-
+	var sort store.Sort = 4
 	opts := store.ListOpt{
-		Page:  1,
+		Page:  0,
 		Limit: 3,
 		Sort:  sort,
 	}
 
-	ds := store.Items{}
-
-	for i := 0; int64(i) < opts.Limit; i++ {
-		d := successStruct{
-			Namespace: "StreamSpace",
-		}
-		ds = append(ds, &d)
-	}
-
-	_, err = bltHndlr.List(ds, opts)
+	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < len(ds); i++ {
+	for i := 0; i < count; i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
-	}
-
-	if bltHndlr.dbP != nil {
-		bltHndlr.dbP.Close()
 	}
 }

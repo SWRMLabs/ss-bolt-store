@@ -228,15 +228,16 @@ func (b *ssBoltHandler) Delete(i store.Item) error {
 }
 
 // List
-func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
+func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (int, store.Items, error) {
 	var (
 		mainBucket        = []byte(b.conf.Bucket)
 		indexBucket       = []byte("Index")
 		skip              = (o.Page) * o.Limit
 		listCounter       = 0
 		loopCounter int64 = 1
+		list			  = []store.Item{}
 	)
-	nsToList := l[0].GetNamespace()
+	nsToList := factory.Factory().GetNamespace()
 	order := o.Sort
 
 	err := b.dbP.View(func(tx *bolt.Tx) error {
@@ -253,15 +254,11 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 			}
 			indexCursor = indexBkt.Cursor()
 		}
-		log.Debug(nsToList)
 		switch order {
 		case store.SortNatural:
 			for k, v := mainCursor.First(); k != nil; k, v = mainCursor.Next() {
 				if listCounter < int(o.Limit) {
-					serializableItem, ok := l[listCounter].(store.Serializable)
-					if ok != true {
-						return errors.New("item is not Serializable")
-					}
+					serializableItem := factory.Factory()
 					if strings.HasPrefix(string(k), nsToList) {
 						if loopCounter <= skip {
 							loopCounter++
@@ -271,6 +268,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 						if err != nil {
 							return err
 						}
+						list = append(list, serializableItem)
 						listCounter++
 					}
 				}
@@ -281,10 +279,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 					if strings.HasSuffix(string(k), "created") && strings.HasPrefix(string(v), nsToList) {
 						mainValue := mainBkt.Get(v)
 						if listCounter < int(o.Limit) {
-							serializableItem, ok := l[listCounter].(store.Serializable)
-							if ok != true {
-								return errors.New("item is not Serializable")
-							}
+							serializableItem := factory.Factory()
 							log.Debug("IndexKey:", string(k), "IndexValue:", string(v), "MainValue:", string(mainValue))
 							if loopCounter <= skip {
 								loopCounter++
@@ -294,6 +289,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 							if err != nil {
 								return err
 							}
+							list = append(list, serializableItem)
 							listCounter++
 						}
 					}
@@ -305,10 +301,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 					if strings.HasSuffix(string(k), "created") && strings.HasPrefix(string(v), nsToList) {
 						mainValue := mainBkt.Get(v)
 						if listCounter < int(o.Limit) {
-							serializableItem, ok := l[listCounter].(store.Serializable)
-							if ok != true {
-								return errors.New("item is not Serializable")
-							}
+							serializableItem := factory.Factory()
 							log.Debug("IndexKey:", string(k), "IndexValue:", string(v), "MainValue:", string(mainValue))
 							if loopCounter <= skip {
 								loopCounter++
@@ -318,6 +311,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 							if err != nil {
 								return err
 							}
+							list = append(list, serializableItem)
 							listCounter++
 						}
 					}
@@ -329,10 +323,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 					if strings.HasSuffix(string(k), "updated") && strings.HasPrefix(string(v), nsToList) {
 						mainValue := mainBkt.Get(v)
 						if listCounter < int(o.Limit) {
-							serializableItem, ok := l[listCounter].(store.Serializable)
-							if ok != true {
-								return errors.New("item is not Serializable")
-							}
+							serializableItem := factory.Factory()
 							log.Debug("IndexKey:", string(k), "IndexValue:", string(v), "MainValue:", string(mainValue))
 							if loopCounter <= skip {
 								loopCounter++
@@ -342,6 +333,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 							if err != nil {
 								return err
 							}
+							list = append(list, serializableItem)
 							listCounter++
 						}
 					}
@@ -353,10 +345,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 					if strings.HasSuffix(string(k), "updated") && strings.HasPrefix(string(v), nsToList) {
 						mainValue := mainBkt.Get(v)
 						if listCounter < int(o.Limit) {
-							serializableItem, ok := l[listCounter].(store.Serializable)
-							if ok != true {
-								return errors.New("item is not Serializable")
-							}
+							serializableItem := factory.Factory()
 							log.Debug("IndexKey:", string(k), "IndexValue:", string(v), "MainValue:", string(mainValue))
 							if loopCounter <= skip {
 								loopCounter++
@@ -366,6 +355,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 							if err != nil {
 								return err
 							}
+							list = append(list, serializableItem)
 							listCounter++
 						}
 					}
@@ -374,7 +364,7 @@ func (b *ssBoltHandler) List(l store.Items, o store.ListOpt) (int, error) {
 		}
 		return nil
 	})
-	return listCounter, err
+	return listCounter, list, err
 }
 
 func (b *ssBoltHandler) Close() error {
