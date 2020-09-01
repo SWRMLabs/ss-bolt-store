@@ -13,8 +13,6 @@ import (
 	logger "github.com/ipfs/go-log/v2"
 )
 
-var RecordNotFound = errors.New("record not found")
-
 var log = logger.Logger("store/bolt")
 
 type BoltConfig struct {
@@ -145,7 +143,7 @@ func (b *ssBoltHandler) Read(i store.Item) error {
 		}
 		buf := bucket.Get(key)
 		if buf == nil {
-			return RecordNotFound
+			return store.ErrRecordNotFound
 		}
 		return serializableItem.Unmarshal(buf)
 	})
@@ -228,7 +226,7 @@ func (b *ssBoltHandler) Delete(i store.Item) error {
 }
 
 // List
-func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (int, store.Items, error) {
+func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Items, error) {
 	var (
 		mainBucket        = []byte(b.conf.Bucket)
 		indexBucket       = []byte("Index")
@@ -364,7 +362,7 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (int, store
 		}
 		return nil
 	})
-	return listCounter, list, err
+	return list, err
 }
 
 func (b *ssBoltHandler) Close() error {

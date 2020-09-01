@@ -227,11 +227,11 @@ func TestSortNaturalLIST(t *testing.T) {
 		Sort:  sort,
 	}
 
-	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
+	ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(ds); i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
@@ -252,12 +252,12 @@ func TestSortCreatedAscLIST(t *testing.T) {
 		Sort:  sort,
 	}
 
-	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
+	ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(ds); i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
@@ -277,12 +277,12 @@ func TestSortCreatedDscLIST(t *testing.T) {
 		Sort:  sort,
 	}
 
-	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
+	ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(ds); i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
@@ -302,12 +302,12 @@ func TestSortUpdatedAscLIST(t *testing.T) {
 		Sort:  sort,
 	}
 
-	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
+	ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(ds); i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
@@ -328,12 +328,12 @@ func TestSortUpdatedDscLIST(t *testing.T) {
 		Sort:  sort,
 	}
 
-	count, ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
+	ds, err := bltHndlr.List(&streamspaceFactory{}, opts)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < len(ds); i++ {
 		if ds[i].GetNamespace() != "StreamSpace" {
 			t.Fatalf("Namespace of the %vth element in list dosn't match", i)
 		}
