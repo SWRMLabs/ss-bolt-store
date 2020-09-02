@@ -266,6 +266,11 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Item
 						if err != nil {
 							return err
 						}
+						if o.Filter != nil {
+							if !o.Filter.Compare(serializableItem) {
+								continue
+							}
+						}
 						list = append(list, serializableItem)
 						listCounter++
 					}
@@ -286,6 +291,11 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Item
 							err := serializableItem.Unmarshal(mainValue)
 							if err != nil {
 								return err
+							}
+							if o.Filter != nil {
+								if !o.Filter.Compare(serializableItem) {
+									continue
+								}
 							}
 							list = append(list, serializableItem)
 							listCounter++
@@ -309,6 +319,11 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Item
 							if err != nil {
 								return err
 							}
+							if o.Filter != nil {
+								if !o.Filter.Compare(serializableItem) {
+									continue
+								}
+							}
 							list = append(list, serializableItem)
 							listCounter++
 						}
@@ -331,6 +346,11 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Item
 							if err != nil {
 								return err
 							}
+							if o.Filter != nil {
+								if !o.Filter.Compare(serializableItem) {
+									continue
+								}
+							}
 							list = append(list, serializableItem)
 							listCounter++
 						}
@@ -352,6 +372,11 @@ func (b *ssBoltHandler) List(factory store.Factory, o store.ListOpt) (store.Item
 							err := serializableItem.Unmarshal(mainValue)
 							if err != nil {
 								return err
+							}
+							if o.Filter != nil {
+								if !o.Filter.Compare(serializableItem) {
+									continue
+								}
 							}
 							list = append(list, serializableItem)
 							listCounter++
