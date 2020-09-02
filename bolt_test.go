@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	testsuite "github.com/StreamSpace/store-test-suite"
+	testsuite "github.com/StreamSpace/ss-store/testsuite"
 	logger "github.com/ipfs/go-log/v2"
 )
 
