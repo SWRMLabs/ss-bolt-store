@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/StreamSpace/ss-store"
+	"github.com/SWRMLabs/ss-store"
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
 	logger "github.com/ipfs/go-log/v2"

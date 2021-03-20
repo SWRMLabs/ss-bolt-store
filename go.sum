@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/StreamSpace/ss-store v0.0.2 h1:rcHZBuPSiuvPtZfIKnimmy2ysTrwRjYCIsEUHxPhsTU=
-github.com/StreamSpace/ss-store v0.0.2/go.mod h1:oG6enJAEaKaHQHSUgmxrv3f3cx26Tn/zPX+Ws6rZawk=
+github.com/SWRMLabs/ss-store v0.0.3 h1:1M5zRg1EGtOV6hjyX9qU1hA8zzu881ZF7JvY4VeQk10=
+github.com/SWRMLabs/ss-store v0.0.3/go.mod h1:HUvvTPQ+Ot0eXUOdIMKiO3hUjUID427fC1gVihCcOU4=
 github.com/boltdb/bolt v1.3.1 h1:JQmyP4ZBrce+ZQu0dY660FMfatumYDLun9hBCUVIkF4=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
